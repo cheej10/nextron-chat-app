@@ -1,34 +1,30 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import { auth } from '../firebase-config';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 
-function Home() {
-  const router = useRouter();
+function Signup() {
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
 
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-
-  const login = async () => {
+  const signup = async () => {
     try {
-      const user = await signInWithEmailAndPassword(
+      const user = await createUserWithEmailAndPassword(
         auth,
-        loginEmail,
-        loginPassword
+        signupEmail,
+        signupPassword
       );
-
-      router.push('/next');
+      console.log(user);
     } catch (error) {
-      alert('이메일이나 비밀번호가 잘못되었습니다.');
+      console.log(error);
     }
   };
 
   return (
     <React.Fragment>
       <Head>
-        <title>Home</title>
+        <title>회원가입</title>
       </Head>
       <div className="w-screen h-screen flex items-center justify-center">
         <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
@@ -43,7 +39,7 @@ function Home() {
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="username"
               type="text"
-              onChange={(e) => setLoginEmail(e.target.value)}
+              onChange={(e) => setSignupEmail(e.target.value)}
             />
           </div>
           <div className="mb-6">
@@ -57,19 +53,19 @@ function Home() {
               className="shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
               id="password"
               type="password"
-              onChange={(e) => setLoginPassword(e.target.value)}
+              onChange={(e) => setSignupPassword(e.target.value)}
             />
           </div>
           <div className="flex flex-col items-center justify-center">
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
               type="button"
-              onClick={login}
+              onClick={signup}
             >
-              로그인
+              회원가입
             </button>
             <p className="my-2 cursor-pointer text-gray-700 underline text-sm">
-              <Link href="/signup">회원가입</Link>
+              <Link href="/home">로그인</Link>
             </p>
           </div>
         </form>
@@ -78,4 +74,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Signup;
