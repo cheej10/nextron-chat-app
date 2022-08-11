@@ -30,11 +30,11 @@ function UserList({ handleListClick, myId }) {
   }, []);
 
   return (
-    <ul className="divide-y-2 divide-gray-100">
+    <ul className="divide-y divide-gray-100">
       {userList.map((user) => (
         <li
           key={user.key}
-          className="p-3 text-gray-700 hover:cursor-pointer hover:bg-gray-50"
+          className="p-3 text-gray-100 hover:cursor-pointer hover:bg-gray-500"
           onClick={() => {
             handleListClick(user);
           }}

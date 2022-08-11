@@ -74,12 +74,21 @@ function ChatRoom({ chatRoomKey, createRoomKey, chatUser, myInfo }) {
   }, [chatRoomKey]);
 
   return (
-    <div className="grow w-full max-h-screen flex flex-col">
-      <div className="grow overflow-y-auto">
+    <div className="grow w-full max-h-screen flex flex-col bg-gray-400">
+      <div className="bg-gray-400 text-gray-900 h-14 shadow p-4 font-bold">
+        {chatUser.nickname}
+      </div>
+      <div className="grow overflow-y-auto text-gray-900 px-2">
         {messages.map(({ key, message, userNickname }) => (
-          <div key={key}>
-            <p>{userNickname}</p>
-            <p>{message}</p>
+          <div
+            key={key}
+            className={
+              'my-2 flex flex-col' +
+              (userNickname === myInfo.nickname ? ' items-end' : ' items-start')
+            }
+          >
+            <p>{userNickname === myInfo.nickname ? '' : userNickname}</p>
+            <p className="bg-white w-fit p-1.5 rounded-md">{message}</p>
           </div>
         ))}
       </div>

@@ -78,18 +78,24 @@ function Home() {
       </Head>
       {Object.keys(myInfo).length > 0 && (
         <div className="flex">
-          <div className="flex-none w-56 h-screen bg-gray-200 shadow">
-            <div className="text-gray-700 divide-x-2 divide-gray-100 border-gray-100 border-b-2">
+          <div className="flex-none w-56 h-screen bg-gray-700 shadow">
+            <div className="bg-gray-900 text-gray-100 divide-x divide-gray-100 border-gray-100 border-b">
               <button
                 type="button"
-                className="w-1/2 py-4"
+                className={
+                  'w-1/2 py-4 hover:bg-gray-500' +
+                  (openUserList ? ' bg-gray-500' : '')
+                }
                 onClick={() => handleTabClick('userTab')}
               >
                 유저목록
               </button>
               <button
                 type="button"
-                className="w-1/2 py-4"
+                className={
+                  'w-1/2 py-4 hover:bg-gray-500' +
+                  (openChatList ? ' bg-gray-500' : '')
+                }
                 onClick={() => handleTabClick('chatTab')}
               >
                 채팅목록
