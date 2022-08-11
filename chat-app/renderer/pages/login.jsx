@@ -19,6 +19,7 @@ function Login() {
         loginPassword
       );
 
+      localStorage.setItem('userId', user.user.uid);
       router.push('/home');
     } catch (error) {
       alert('이메일이나 비밀번호가 잘못되었습니다.');
