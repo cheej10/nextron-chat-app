@@ -1,104 +1,77 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getDatabase, set, push, ref, onValue, get } from 'firebase/database';
 
-function ChatRoom({ chatUser, myId }) {
-  const [myInfo, setMyInfo] = useState({});
+function ChatRoom({ chatRoomKey, createRoomKey, chatUser, myInfo }) {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const chatRoomKey = useRef('');
   const db = getDatabase();
-
-  // 채팅 상대 바꿀때마다 setMyInfo하고 리렌더링
-  useEffect(() => {
-    getMyInfo();
-  }, [chatUser]);
-
-  // myInfo set되면 메시지 정보 가져오기
-  useEffect(() => {
-    getChatRoomData();
-  }, [myInfo]);
-
-  const getMyInfo = () => {
-    const usersRef = ref(db, 'users/' + myId);
-
-    onValue(usersRef, (snapshot) => {
-      const data = snapshot.val();
-
-      setMyInfo(data);
-    });
-  };
 
   const getChatRoomData = () => {
     setMessages([]);
-    onValue(ref(db, 'usersChatRoomList/'), (snapshot) => {
+
+    const chatRoomRef = ref(db, 'chatRooms/' + chatRoomKey);
+
+    onValue(chatRoomRef, (snapshot) => {
       const data = snapshot.val();
-      const myChatRoomList = Object.entries(data).filter((chatRoom) =>
-        chatRoom[1].includes(myId)
-      );
-      const currentChatRoom = myChatRoomList.find((chatRoom) =>
-        chatRoom[1].includes(chatUser.key)
-      );
 
-      if (!currentChatRoom) return;
-
-      chatRoomKey.current = currentChatRoom[0];
-      const chatRoomRef = ref(db, 'chatRooms/' + chatRoomKey.current);
-
-      onValue(chatRoomRef, (snapshot) => {
-        const data = snapshot.val();
-
-        if (data) {
-          setMessages(
-            Object.keys(data).map((key) => {
-              return {
-                key,
-                message: Object.values(data[key])[0],
-                userID: Object.values(data[key])[1],
-                userNickname: Object.values(data[key])[2],
-              };
-            })
-          );
-        } else {
-          setMessages([]);
-        }
-      });
+      if (data) {
+        setMessages(
+          Object.keys(data).map((key) => {
+            return {
+              key,
+              message: Object.values(data[key])[0],
+              userID: Object.values(data[key])[1],
+              userNickname: Object.values(data[key])[2],
+            };
+          })
+        );
+      } else {
+        setMessages([]);
+      }
     });
   };
 
   const createChatRoom = () => {
     const key = push(ref(db, 'chatRooms/')).key;
 
-    set(ref(db, 'usersChatRoomList/' + key), [myId, chatUser.key]);
-    chatRoomKey.current = key;
+    set(ref(db, 'usersChatRoomList/' + key), [myInfo.key, chatUser.key]);
+
+    createRoomKey(key);
+    return key;
   };
 
   const sendMessage = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
 
+      setInputMessage('');
+
       // 첫 메시지면 채팅방 생성
       if (!messages.length) {
-        console.log('방 생성');
-        createChatRoom();
-      } else {
-        console.log('방 있어');
+        const key = createChatRoom();
+        saveMessageData(key);
+        return;
       }
 
-      saveMessageData();
-      setInputMessage('');
+      saveMessageData(chatRoomKey);
     }
   };
 
-  const saveMessageData = () => {
-    const chatRoomRef = ref(db, 'chatRooms/' + chatRoomKey.current);
+  const saveMessageData = (key) => {
+    const chatRoomRef = ref(db, 'chatRooms/' + key);
+
     push(chatRoomRef, {
-      user: myId,
+      user: myInfo.key,
       message: inputMessage,
       userNickname: myInfo.nickname,
     });
 
     getChatRoomData();
   };
+
+  useEffect(() => {
+    getChatRoomData();
+  }, [chatRoomKey]);
 
   return (
     <div className="grow w-full max-h-screen flex flex-col">
