@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getDatabase, set, push, ref, onValue, get } from 'firebase/database';
 
-function ChatRoom({ chatRoomKey, createRoomKey, chatUser, myInfo }) {
+function ChatRoom({
+  chatRoomKey,
+  createRoomKey,
+  chatUser,
+  groupChatUsers,
+  myInfo,
+}) {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const db = getDatabase();
@@ -9,11 +15,12 @@ function ChatRoom({ chatRoomKey, createRoomKey, chatUser, myInfo }) {
   const getChatRoomData = () => {
     setMessages([]);
 
+    // chatRoomKey 있을때만 실행되게
     const chatRoomRef = ref(db, 'chatRooms/' + chatRoomKey);
 
     onValue(chatRoomRef, (snapshot) => {
       const data = snapshot.val();
-
+      console.log(data);
       if (data) {
         setMessages(
           Object.keys(data).map((key) => {
@@ -32,9 +39,20 @@ function ChatRoom({ chatRoomKey, createRoomKey, chatUser, myInfo }) {
   };
 
   const createChatRoom = () => {
-    const key = push(ref(db, 'chatRooms/')).key;
+    let key = '';
 
-    set(ref(db, 'usersChatRoomList/' + key), [myInfo.key, chatUser.key]);
+    if (groupChatUsers.length > 0) {
+      key = push(ref(db, 'groupChatRooms/')).key;
+
+      set(ref(db, 'usersChatRoomList/' + key), [
+        myInfo.key,
+        ...groupChatUsers.map((user) => user.key),
+      ]);
+    } else {
+      key = push(ref(db, 'chatRooms/')).key;
+
+      set(ref(db, 'usersChatRoomList/' + key), [myInfo.key, chatUser.key]);
+    }
 
     createRoomKey(key);
     return key;
@@ -76,7 +94,9 @@ function ChatRoom({ chatRoomKey, createRoomKey, chatUser, myInfo }) {
   return (
     <div className="grow w-full max-h-screen flex flex-col bg-gray-400">
       <div className="bg-gray-400 text-gray-900 h-14 shadow p-4 font-bold">
-        {chatUser.nickname}
+        {groupChatUsers.length
+          ? groupChatUsers.map((user) => user.nickname).join(', ')
+          : chatUser.nickname}
       </div>
       <div className="grow overflow-y-auto text-gray-900 px-2">
         {messages.map(({ key, message, userNickname }) => (

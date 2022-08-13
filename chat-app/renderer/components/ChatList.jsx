@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getDatabase, set, push, ref, onValue, get } from 'firebase/database';
+import UserList from './UserList';
 
 function ChatList({ handleListClick, myId }) {
   const [chatUserList, setChatUserList] = useState([]);
@@ -13,18 +14,32 @@ function ChatList({ handleListClick, myId }) {
       );
 
       myChatRoomList.forEach((chatRoom) => {
-        const chatUserId = chatRoom[1].find((key) => key !== myId);
+        const chatUserId = chatRoom[1].filter((key) => key !== myId);
+        const groupChatUsers = [];
 
-        onValue(ref(db, 'users/' + chatUserId), (snapshot) => {
-          const user = snapshot.val();
+        if (chatUserId.length > 1) {
+          chatUserId.forEach((userId) => {
+            onValue(ref(db, 'users/' + userId), (snapshot) => {
+              const user = snapshot.val();
 
-          setChatUserList((pre) => [
-            ...pre,
-            {
-              key: chatUserId,
-              nickname: user.nickname,
-            },
-          ]);
+              groupChatUsers.push({ key: userId, ...user });
+            });
+          });
+          setChatUserList((pre) => [...pre, groupChatUsers]);
+          return;
+        }
+
+        chatUserId.forEach((userId) => {
+          onValue(ref(db, 'users/' + userId), (snapshot) => {
+            const user = snapshot.val();
+            setChatUserList((pre) => [
+              ...pre,
+              {
+                key: userId,
+                nickname: user.nickname,
+              },
+            ]);
+          });
         });
       });
     });
@@ -35,16 +50,20 @@ function ChatList({ handleListClick, myId }) {
   }, []);
 
   return (
-    <ul className="divide-y divide-gray-100">
+    <ul className="divide-y divide-gray-500">
       {chatUserList.map((user) => (
         <li
-          key={user.key}
+          key={
+            Array.isArray(user) ? user.map(({ key }) => key).join('') : user.key
+          }
           className="p-3 text-gray-100 hover:cursor-pointer hover:bg-gray-500"
           onClick={() => {
             handleListClick(user);
           }}
         >
-          {user.nickname}
+          {Array.isArray(user)
+            ? user.map(({ nickname }) => nickname).join(', ')
+            : user.nickname}
         </li>
       ))}
     </ul>

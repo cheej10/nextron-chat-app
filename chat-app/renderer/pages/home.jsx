@@ -12,6 +12,7 @@ function Home() {
   const [openUserList, setOpenUserList] = useState(false);
   const [openChatList, setOpenChatList] = useState(false);
   const [chatUser, setChatUser] = useState({});
+  const [groupChatUsers, setGroupChatUsers] = useState([]);
   const [chatRoomKey, setChatRoomKey] = useState('');
   const [myInfo, setMyInfo] = useState({});
   const db = getDatabase();
@@ -41,18 +42,56 @@ function Home() {
 
   const handleListClick = (user) => {
     setOpenChatRoom(true);
-    setChatUser(user);
+
+    if (Array.isArray(user)) {
+      setChatUser({});
+      setGroupChatUsers(user);
+    } else {
+      setGroupChatUsers([]);
+      setChatUser(user);
+    }
+  };
+
+  const handleGroupChat = (users) => {
+    setOpenChatRoom(true);
+    setGroupChatUsers(users);
   };
 
   const getChatRoomKey = () => {
     onValue(ref(db, 'usersChatRoomList/'), (snapshot) => {
       const data = snapshot.val();
+      // data 있을 때 없을 때 구분
+      // 이미 있는 방인지(유저 구성 일치하는 방 있는지) 확인하는 로직?
       const myChatRoomList = Object.entries(data).filter((chatRoom) =>
         chatRoom[1].includes(myInfo.key)
       );
-      const currentChatRoom = myChatRoomList.find((chatRoom) =>
-        chatRoom[1].includes(chatUser.key)
-      );
+
+      if (groupChatUsers.length > 0) {
+        const groupChatRoom = myChatRoomList.filter(
+          (chatRoom) => chatRoom[1].length > 2
+        );
+
+        const currentChatRoom = groupChatRoom.find((chatRoom) => {
+          const users = chatRoom[1].filter((userId) => userId !== myInfo.key);
+
+          if (
+            users.sort((a, b) => a - b).join('') ===
+            groupChatUsers
+              .map(({ key }) => key)
+              .sort((a, b) => a - b)
+              .join('')
+          )
+            return chatRoom;
+        });
+
+        setChatRoomKey(currentChatRoom?.[0]);
+
+        return;
+      }
+
+      const currentChatRoom = myChatRoomList
+        .filter((chatRoom) => chatRoom[1].length === 2)
+        .find((chatRoom) => chatRoom[1].includes(chatUser.key));
 
       setChatRoomKey(currentChatRoom?.[0]);
     });
@@ -69,7 +108,7 @@ function Home() {
 
   useEffect(() => {
     getChatRoomKey();
-  }, [chatUser]);
+  }, [chatUser, groupChatUsers]);
 
   return (
     <React.Fragment>
@@ -78,8 +117,8 @@ function Home() {
       </Head>
       {Object.keys(myInfo).length > 0 && (
         <div className="flex">
-          <div className="flex-none w-56 h-screen bg-gray-700 shadow">
-            <div className="bg-gray-900 text-gray-100 divide-x divide-gray-100 border-gray-100 border-b">
+          <div className="flex flex-col flex-none w-56 h-screen bg-gray-700 shadow">
+            <div className="bg-gray-900 text-gray-100 divide-x divide-gray-500 border-gray-500 border-b">
               <button
                 type="button"
                 className={
@@ -104,6 +143,7 @@ function Home() {
             {openUserList && (
               <UserList
                 handleListClick={handleListClick}
+                handleGroupChat={handleGroupChat}
                 myId={myInfo.key}
               ></UserList>
             )}
@@ -119,6 +159,7 @@ function Home() {
               chatRoomKey={chatRoomKey}
               createRoomKey={createRoomKey}
               chatUser={chatUser}
+              groupChatUsers={groupChatUsers}
               myInfo={myInfo}
             />
           )}
