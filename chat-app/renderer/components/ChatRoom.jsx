@@ -13,28 +13,27 @@ function ChatRoom({
   const db = getDatabase();
 
   const getChatRoomData = () => {
+    console.log(chatRoomKey);
     setMessages([]);
 
-    // chatRoomKey 있을때만 실행되게
+    if (!chatRoomKey) return;
+
     const chatRoomRef = ref(db, 'chatRooms/' + chatRoomKey);
 
     onValue(chatRoomRef, (snapshot) => {
+      console.log(chatRoomKey);
       const data = snapshot.val();
-      console.log(data);
-      if (data) {
-        setMessages(
-          Object.keys(data).map((key) => {
-            return {
-              key,
-              message: Object.values(data[key])[0],
-              userID: Object.values(data[key])[1],
-              userNickname: Object.values(data[key])[2],
-            };
-          })
-        );
-      } else {
-        setMessages([]);
-      }
+
+      setMessages(
+        Object.keys(data).map((key) => {
+          return {
+            key,
+            message: Object.values(data[key])[0],
+            userID: Object.values(data[key])[1],
+            userNickname: Object.values(data[key])[2],
+          };
+        })
+      );
     });
   };
 

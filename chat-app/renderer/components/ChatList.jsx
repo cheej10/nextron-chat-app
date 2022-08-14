@@ -7,39 +7,44 @@ function ChatList({ handleListClick, myId }) {
   const db = getDatabase();
 
   const getMyChatList = () => {
+    let myChatRoomList = [];
+
     onValue(ref(db, 'usersChatRoomList/'), (snapshot) => {
       const data = snapshot.val();
-      const myChatRoomList = Object.entries(data).filter((chatRoom) =>
-        chatRoom[1].includes(myId)
-      );
 
-      myChatRoomList.forEach((chatRoom) => {
-        const chatUserId = chatRoom[1].filter((key) => key !== myId);
-        const groupChatUsers = [];
+      if (data) {
+        myChatRoomList = Object.entries(data).filter((chatRoom) =>
+          chatRoom[1].includes(myId)
+        );
+      }
+    });
 
-        if (chatUserId.length > 1) {
-          chatUserId.forEach((userId) => {
-            onValue(ref(db, 'users/' + userId), (snapshot) => {
-              const user = snapshot.val();
+    myChatRoomList.forEach((chatRoom) => {
+      const chatUserId = chatRoom[1].filter((key) => key !== myId);
+      const groupChatUsers = [];
 
-              groupChatUsers.push({ key: userId, ...user });
-            });
-          });
-          setChatUserList((pre) => [...pre, groupChatUsers]);
-          return;
-        }
-
+      if (chatUserId.length > 1) {
         chatUserId.forEach((userId) => {
           onValue(ref(db, 'users/' + userId), (snapshot) => {
             const user = snapshot.val();
-            setChatUserList((pre) => [
-              ...pre,
-              {
-                key: userId,
-                nickname: user.nickname,
-              },
-            ]);
+
+            groupChatUsers.push({ key: userId, ...user });
           });
+        });
+        setChatUserList((pre) => [...pre, groupChatUsers]);
+        return;
+      }
+
+      chatUserId.forEach((userId) => {
+        onValue(ref(db, 'users/' + userId), (snapshot) => {
+          const user = snapshot.val();
+          setChatUserList((pre) => [
+            ...pre,
+            {
+              key: userId,
+              nickname: user.nickname,
+            },
+          ]);
         });
       });
     });

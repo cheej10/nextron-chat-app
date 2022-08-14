@@ -39,11 +39,17 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
   };
 
   const handleCompleteBtn = () => {
+    if (checkedUsers.current.length < 2) {
+      alert('두 명 이상 선택해주세요.');
+      return;
+    }
+
     const usersRef = ref(db, 'users/');
     let users = [];
 
     onValue(usersRef, (snapshot) => {
       const data = snapshot.val();
+
       users = Object.keys(data)
         .filter((key) => checkedUsers.current.includes(key))
         .map((key) => {
