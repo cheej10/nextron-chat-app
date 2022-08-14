@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
-import { auth } from '../firebase-config';
 import { getDatabase, ref, onValue } from 'firebase/database';
+import { auth } from '../firebase-config';
 import ChatRoom from '../components/ChatRoom';
 import UserList from '../components/UserList';
 import ChatList from '../components/ChatList';

@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { getDatabase, set, push, ref, onValue, get } from 'firebase/database';
-import UserList from './UserList';
+import React, { useState, useEffect } from 'react';
+import { getDatabase, ref, onValue } from 'firebase/database';
 
 function ChatList({ handleListClick, myId }) {
   const [chatUserList, setChatUserList] = useState([]);

@@ -1,11 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getDatabase, set, push, ref, onValue, get } from 'firebase/database';
+import { getDatabase, ref, onValue } from 'firebase/database';
+import { auth } from '../firebase-config';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/router';
 
 function UserList({ handleListClick, handleGroupChat, myId }) {
   const [userList, setUserList] = useState([]);
   const [userSelectMode, setUserSelectMode] = useState(false);
   const checkedUsers = useRef([]);
   const db = getDatabase();
+  const router = useRouter();
 
   const getUsers = () => {
     const usersRef = ref(db, 'users/');
@@ -66,6 +70,17 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
     checkedUsers.current = [];
   };
 
+  const logout = async () => {
+    try {
+      const user = await signOut(auth);
+
+      localStorage.removeItem('userId');
+      router.push('/login');
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     getUsers();
   }, []);
@@ -92,24 +107,31 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
             )}
           </li>
         ))}
+        {userSelectMode ? (
+          <button
+            type="button"
+            className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
+            onClick={handleCompleteBtn}
+          >
+            완료
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
+            onClick={() => setUserSelectMode(true)}
+          >
+            그룹채팅
+          </button>
+        )}
       </ul>
-      {userSelectMode ? (
-        <button
-          type="button"
-          className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
-          onClick={handleCompleteBtn}
-        >
-          완료
-        </button>
-      ) : (
-        <button
-          type="button"
-          className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
-          onClick={() => setUserSelectMode(true)}
-        >
-          그룹채팅 시작하기
-        </button>
-      )}
+      <button
+        type="button"
+        className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
+        onClick={logout}
+      >
+        로그아웃
+      </button>
     </div>
   );
 }

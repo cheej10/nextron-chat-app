@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -22,7 +22,16 @@ function Login() {
       localStorage.setItem('userId', user.user.uid);
       router.push('/home');
     } catch (error) {
-      alert('이메일이나 비밀번호가 잘못되었습니다.');
+      switch (error.code) {
+        case 'auth/user-not-found':
+          console.log('가입되지 않은 이메일입니다.');
+          break;
+        case 'auth/internal-error':
+          console.log('정보를 모두 입력해주세요.');
+          break;
+        default:
+          console.log('이메일이나 비밀번호가 잘못되었습니다.');
+      }
     }
   };
 

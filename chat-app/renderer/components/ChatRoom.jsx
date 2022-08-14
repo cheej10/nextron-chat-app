@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { getDatabase, set, push, ref, onValue, get } from 'firebase/database';
+import React, { useState, useEffect } from 'react';
+import { getDatabase, set, push, ref, onValue } from 'firebase/database';
 
 function ChatRoom({
   chatRoomKey,

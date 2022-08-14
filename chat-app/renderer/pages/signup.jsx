@@ -91,7 +91,7 @@ function Signup() {
               회원가입
             </button>
             <p className="my-2 cursor-pointer text-gray-700 underline text-sm">
-              <Link href="/home">로그인</Link>
+              <Link href="/login">로그인</Link>
             </p>
           </div>
         </form>
