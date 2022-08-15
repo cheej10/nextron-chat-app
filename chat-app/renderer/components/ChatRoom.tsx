@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getDatabase, set, push, ref, onValue } from 'firebase/database';
 
 function ChatRoom({
@@ -11,6 +11,7 @@ function ChatRoom({
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const db = getDatabase();
+  const bottomOfMessage = useRef(null);
 
   const getChatRoomData = () => {
     setMessages([]);
@@ -61,7 +62,6 @@ function ChatRoom({
 
       setInputMessage('');
 
-      // 첫 메시지면 채팅방 생성
       if (!messages.length) {
         const key = createChatRoom();
         saveMessageData(key);
@@ -83,6 +83,10 @@ function ChatRoom({
 
     getChatRoomData();
   };
+
+  useEffect(() => {
+    bottomOfMessage.current.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   useEffect(() => {
     getChatRoomData();
@@ -108,6 +112,7 @@ function ChatRoom({
             <p className="bg-white w-fit p-1.5 rounded-md">{message}</p>
           </div>
         ))}
+        <div ref={bottomOfMessage}></div>
       </div>
       <textarea
         id="message"
