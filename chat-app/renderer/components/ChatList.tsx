@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { getDatabase, ref, onValue } from 'firebase/database';
 
-function ChatList({ handleListClick, myId }) {
+type propsType = {
+  handleListClick: Function;
+  myId: string;
+};
+
+type chatRoomType = [string, string[]];
+
+function ChatList({ handleListClick, myId }: propsType) {
   const [chatUserList, setChatUserList] = useState([]);
   const db = getDatabase();
 
@@ -12,13 +19,13 @@ function ChatList({ handleListClick, myId }) {
       const data = snapshot.val();
 
       if (data) {
-        myChatRoomList = Object.entries(data).filter(
-          (chatRoom: [string, string[]]) => chatRoom[1].includes(myId)
+        myChatRoomList = Object.entries(data).filter((chatRoom: chatRoomType) =>
+          chatRoom[1].includes(myId)
         );
       }
     });
 
-    myChatRoomList.forEach((chatRoom) => {
+    myChatRoomList.forEach((chatRoom: chatRoomType) => {
       const chatUserId = chatRoom[1].filter((key: string) => key !== myId);
       const groupChatUsers = [];
 
@@ -30,6 +37,7 @@ function ChatList({ handleListClick, myId }) {
             groupChatUsers.push({ key: userId, ...user });
           });
         });
+
         setChatUserList((pre) => [...pre, groupChatUsers]);
         return;
       }

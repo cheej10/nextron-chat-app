@@ -5,6 +5,9 @@ import { auth } from '../firebase-config';
 import ChatRoom from '../components/ChatRoom';
 import UserList from '../components/UserList';
 import ChatList from '../components/ChatList';
+import Loading from '../components/Loading';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faComments, faUser } from '@fortawesome/free-solid-svg-icons';
 
 type userType = {
   key: string;
@@ -12,12 +15,14 @@ type userType = {
   nickname: string;
 };
 
+type chatRoomType = [string, string[]];
+
 function Home() {
   const [openChatRoom, setOpenChatRoom] = useState(false);
   const [openUserList, setOpenUserList] = useState(false);
   const [openChatList, setOpenChatList] = useState(false);
   const [chatUser, setChatUser] = useState<userType>();
-  const [groupChatUsers, setGroupChatUsers] = useState([]);
+  const [groupChatUsers, setGroupChatUsers] = useState<[userType]>();
   const [chatRoomKey, setChatRoomKey] = useState('');
   const [myInfo, setMyInfo] = useState<userType>();
   const db = getDatabase();
@@ -29,7 +34,9 @@ function Home() {
     onValue(usersRef, (snapshot) => {
       const data = snapshot.val();
 
-      setMyInfo({ key: myId, ...data });
+      if (data) {
+        setMyInfo({ key: myId, ...data });
+      }
     });
   };
 
@@ -45,7 +52,7 @@ function Home() {
     }
   };
 
-  const handleListClick = (user: userType) => {
+  const handleListClick = (user: userType | [userType]) => {
     setOpenChatRoom(true);
 
     if (Array.isArray(user)) {
@@ -57,7 +64,7 @@ function Home() {
     }
   };
 
-  const handleGroupChat = (users: []) => {
+  const handleGroupChat = (users: [userType]) => {
     setOpenChatRoom(true);
     setGroupChatUsers(users);
   };
@@ -69,18 +76,18 @@ function Home() {
       const data = snapshot.val();
 
       if (data) {
-        myChatRoomList = Object.entries(data).filter(
-          (chatRoom: [string, string[]]) => chatRoom[1].includes(myInfo?.key)
+        myChatRoomList = Object.entries(data).filter((chatRoom: chatRoomType) =>
+          chatRoom[1].includes(myInfo?.key)
         );
       }
     });
 
     if (groupChatUsers?.length > 0) {
       const groupChatRoom = myChatRoomList.filter(
-        (chatRoom) => chatRoom[1].length > 2
+        (chatRoom: chatRoomType) => chatRoom[1].length > 2
       );
 
-      const currentChatRoom = groupChatRoom.find((chatRoom) => {
+      const currentChatRoom = groupChatRoom.find((chatRoom: chatRoomType) => {
         const users = chatRoom[1].filter(
           (userId: string) => userId !== myInfo.key
         );
@@ -101,8 +108,8 @@ function Home() {
     }
 
     const currentChatRoom = myChatRoomList
-      .filter((chatRoom) => chatRoom[1].length === 2)
-      .find((chatRoom) => chatRoom[1].includes(chatUser.key));
+      .filter((chatRoom: chatRoomType) => chatRoom[1].length === 2)
+      .find((chatRoom: chatRoomType) => chatRoom[1].includes(chatUser?.key));
 
     setChatRoomKey(currentChatRoom?.[0]);
   };
@@ -125,7 +132,7 @@ function Home() {
       <Head>
         <title>홈</title>
       </Head>
-      {myInfo && Object.keys(myInfo).length > 0 && (
+      {myInfo && Object.keys(myInfo).length > 0 ? (
         <div className="flex">
           <div className="flex flex-col flex-none w-56 h-screen bg-gray-700 shadow">
             <div className="bg-gray-900 text-gray-100 divide-x divide-gray-500 border-gray-500 border-b">
@@ -137,7 +144,7 @@ function Home() {
                 }
                 onClick={() => handleTabClick('userTab')}
               >
-                유저목록
+                <FontAwesomeIcon icon={faUser} className="text-xl" />
               </button>
               <button
                 type="button"
@@ -147,7 +154,7 @@ function Home() {
                 }
                 onClick={() => handleTabClick('chatTab')}
               >
-                채팅목록
+                <FontAwesomeIcon icon={faComments} className="text-xl" />
               </button>
             </div>
             {openUserList && (
@@ -174,6 +181,8 @@ function Home() {
             />
           )}
         </div>
+      ) : (
+        <Loading />
       )}
     </React.Fragment>
   );

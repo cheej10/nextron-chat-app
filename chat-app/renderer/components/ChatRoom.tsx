@@ -1,5 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { getDatabase, set, push, ref, onValue } from 'firebase/database';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+
+type userType = {
+  key: string;
+  email: string;
+  nickname: string;
+};
+
+type propsType = {
+  chatRoomKey: string;
+  createRoomKey: Function;
+  chatUser: userType;
+  groupChatUsers: [userType];
+  myInfo: userType;
+};
 
 function ChatRoom({
   chatRoomKey,
@@ -7,7 +23,7 @@ function ChatRoom({
   chatUser,
   groupChatUsers,
   myInfo,
-}) {
+}: propsType) {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const db = getDatabase();
@@ -23,16 +39,18 @@ function ChatRoom({
     onValue(chatRoomRef, (snapshot) => {
       const data = snapshot.val();
 
-      setMessages(
-        Object.keys(data).map((key) => {
-          return {
-            key,
-            message: Object.values(data[key])[0],
-            userID: Object.values(data[key])[1],
-            userNickname: Object.values(data[key])[2],
-          };
-        })
-      );
+      if (data) {
+        setMessages(
+          Object.keys(data).map((key) => {
+            return {
+              key,
+              message: Object.values(data[key])[0],
+              userID: Object.values(data[key])[1],
+              userNickname: Object.values(data[key])[2],
+            };
+          })
+        );
+      }
     });
   };
 
@@ -56,8 +74,10 @@ function ChatRoom({
     return key;
   };
 
-  const sendMessage = (e: React.KeyboardEvent<HTMLElement>) => {
-    if (e.key === 'Enter') {
+  const sendMessage = (
+    e: React.KeyboardEvent<HTMLElement> | React.MouseEvent<HTMLElement>
+  ) => {
+    if (e.type === 'click' || ('key' in e && e.key === 'Enter')) {
       e.preventDefault();
 
       setInputMessage('');
@@ -73,6 +93,8 @@ function ChatRoom({
   };
 
   const saveMessageData = (key: string) => {
+    if (!inputMessage.trim()) return;
+
     const chatRoomRef = ref(db, 'chatRooms/' + key);
 
     push(chatRoomRef, {
@@ -114,15 +136,24 @@ function ChatRoom({
         ))}
         <div ref={bottomOfMessage}></div>
       </div>
-      <textarea
-        id="message"
-        rows={5}
-        className="shrink-0 p-2.5 w-full text-sm text-gray-900 bg-white focus:outline-0 resize-none"
-        placeholder="메시지를 입력해주세요."
-        value={inputMessage}
-        onChange={(e) => setInputMessage(e.target.value)}
-        onKeyDown={sendMessage}
-      ></textarea>
+      <div className="flex w-full">
+        <textarea
+          id="message"
+          rows={5}
+          className="shrink-0 grow p-2.5 text-sm text-gray-900 bg-white focus:outline-0 resize-none"
+          placeholder="메시지를 입력해주세요."
+          value={inputMessage}
+          onChange={(e) => setInputMessage(e.target.value)}
+          onKeyDown={sendMessage}
+        ></textarea>
+        <button
+          type="button"
+          className="w-16 bg-gray-500"
+          onClick={sendMessage}
+        >
+          <FontAwesomeIcon icon={faPaperPlane} className="text-xl" />
+        </button>
+      </div>
     </div>
   );
 }

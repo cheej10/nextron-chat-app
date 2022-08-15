@@ -1,13 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getDatabase, ref, onValue } from 'firebase/database';
 import { auth } from '../firebase-config';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/router';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faArrowRightFromBracket,
+  faUsers,
+  faCircleUser,
+} from '@fortawesome/free-solid-svg-icons';
 
 function UserList({ handleListClick, handleGroupChat, myId }) {
   const [userList, setUserList] = useState([]);
   const [userSelectMode, setUserSelectMode] = useState(false);
-  const checkedUsers = useRef([]);
+  const [checkedUsers, setCheckedUsers] = useState([]);
   const db = getDatabase();
   const router = useRouter();
 
@@ -17,32 +23,34 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
     onValue(usersRef, (snapshot) => {
       const data = snapshot.val();
 
-      setUserList(
-        Object.keys(data)
-          .filter((key) => key !== myId)
-          .map((key) => {
-            return {
-              key,
-              email: data[key].email,
-              nickname: data[key].nickname,
-            };
-          })
-      );
+      if (data) {
+        setUserList(
+          Object.keys(data)
+            .filter((key) => key !== myId)
+            .map((key) => {
+              return {
+                key,
+                email: data[key].email,
+                nickname: data[key].nickname,
+              };
+            })
+        );
+      }
     });
   };
 
   const handleCheckboxClick = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      checkedUsers.current = [...checkedUsers.current, e.target.value];
+      setCheckedUsers([...checkedUsers, e.target.value]);
     } else {
-      checkedUsers.current = checkedUsers.current.filter(
-        (userId) => userId !== e.target.value
+      setCheckedUsers(
+        checkedUsers.filter((userId) => userId !== e.target.value)
       );
     }
   };
 
   const handleCompleteBtn = () => {
-    if (checkedUsers.current.length < 2) {
+    if (checkedUsers.length < 2) {
       console.log('두 명 이상 선택해주세요.');
       return;
     }
@@ -53,25 +61,27 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
     onValue(usersRef, (snapshot) => {
       const data = snapshot.val();
 
-      users = Object.keys(data)
-        .filter((key) => checkedUsers.current.includes(key))
-        .map((key) => {
-          return {
-            key,
-            email: data[key].email,
-            nickname: data[key].nickname,
-          };
-        });
+      if (data) {
+        users = Object.keys(data)
+          .filter((key) => checkedUsers.includes(key))
+          .map((key) => {
+            return {
+              key,
+              email: data[key].email,
+              nickname: data[key].nickname,
+            };
+          });
+      }
     });
 
     setUserSelectMode(false);
     handleGroupChat(users);
-    checkedUsers.current = [];
+    setCheckedUsers([]);
   };
 
   const logout = async () => {
     try {
-      const user = await signOut(auth);
+      await signOut(auth);
 
       localStorage.removeItem('userId');
       router.push('/login');
@@ -97,7 +107,13 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
                   userSelectMode || handleListClick(user);
                 }}
               >
-                {user.nickname}
+                <div className="flex items-center">
+                  <FontAwesomeIcon
+                    icon={faCircleUser}
+                    className="mr-2 text-3xl"
+                  />
+                  {user.nickname}
+                </div>
                 {userSelectMode && (
                   <input
                     type="checkbox"
@@ -111,18 +127,20 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
             {userSelectMode ? (
               <button
                 type="button"
-                className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
+                disabled={checkedUsers.length < 2 ? true : false}
+                className="py-4 w-full border-t border-gray-500 hover:bg-gray-500 text-sm"
                 onClick={handleCompleteBtn}
               >
-                완료
+                {checkedUsers.length < 2 ? '2명 이상 선택해주세요.' : '완료'}
               </button>
             ) : (
               <button
                 type="button"
-                className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
+                className="py-4 w-full border-t border-gray-500 hover:bg-gray-500 text-sm"
                 onClick={() => setUserSelectMode(true)}
               >
-                그룹채팅
+                <FontAwesomeIcon icon={faUsers} className="text-lg mr-2" />
+                그룹채팅 시작하기
               </button>
             )}
           </ul>
@@ -131,6 +149,10 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
             className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
             onClick={logout}
           >
+            <FontAwesomeIcon
+              icon={faArrowRightFromBracket}
+              className="text-xl mr-2"
+            />
             로그아웃
           </button>
         </div>
