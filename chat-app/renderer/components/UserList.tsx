@@ -31,11 +31,10 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
     });
   };
 
-  const handleCheckboxClick = (e) => {
+  const handleCheckboxClick = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       checkedUsers.current = [...checkedUsers.current, e.target.value];
     } else {
-      // checkedUsers 정렬해서 대입하기 (이미 있는 방인지 비교 위해)
       checkedUsers.current = checkedUsers.current.filter(
         (userId) => userId !== e.target.value
       );
@@ -44,7 +43,7 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
 
   const handleCompleteBtn = () => {
     if (checkedUsers.current.length < 2) {
-      alert('두 명 이상 선택해주세요.');
+      console.log('두 명 이상 선택해주세요.');
       return;
     }
 

@@ -24,7 +24,11 @@ function Signup() {
     }
   };
 
-  const saveUserData = (signupEmail, signupNickname, userId) => {
+  const saveUserData = (
+    signupEmail: string,
+    signupNickname: string,
+    userId: string
+  ) => {
     const db = getDatabase();
 
     set(ref(db, 'users/' + userId), {

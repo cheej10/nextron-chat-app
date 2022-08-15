@@ -6,14 +6,20 @@ import ChatRoom from '../components/ChatRoom';
 import UserList from '../components/UserList';
 import ChatList from '../components/ChatList';
 
+type userType = {
+  key: string;
+  email: string;
+  nickname: string;
+};
+
 function Home() {
   const [openChatRoom, setOpenChatRoom] = useState(false);
   const [openUserList, setOpenUserList] = useState(false);
   const [openChatList, setOpenChatList] = useState(false);
-  const [chatUser, setChatUser] = useState({});
+  const [chatUser, setChatUser] = useState<userType>();
   const [groupChatUsers, setGroupChatUsers] = useState([]);
   const [chatRoomKey, setChatRoomKey] = useState('');
-  const [myInfo, setMyInfo] = useState({});
+  const [myInfo, setMyInfo] = useState<userType>();
   const db = getDatabase();
 
   const getMyInfo = () => {
@@ -27,7 +33,7 @@ function Home() {
     });
   };
 
-  const handleTabClick = (tabName) => {
+  const handleTabClick = (tabName: string) => {
     setOpenChatRoom(false);
 
     if (tabName === 'userTab') {
@@ -39,19 +45,19 @@ function Home() {
     }
   };
 
-  const handleListClick = (user) => {
+  const handleListClick = (user: userType) => {
     setOpenChatRoom(true);
 
     if (Array.isArray(user)) {
-      setChatUser({});
+      setChatUser(null);
       setGroupChatUsers(user);
     } else {
-      setGroupChatUsers([]);
+      setGroupChatUsers(null);
       setChatUser(user);
     }
   };
 
-  const handleGroupChat = (users) => {
+  const handleGroupChat = (users: []) => {
     setOpenChatRoom(true);
     setGroupChatUsers(users);
   };
@@ -61,22 +67,24 @@ function Home() {
 
     onValue(ref(db, 'usersChatRoomList/'), (snapshot) => {
       const data = snapshot.val();
-      // 이미 있는 방인지(유저 구성 일치하는 방 있는지) 확인하는 로직?
+
       if (data) {
-        myChatRoomList = Object.entries(data).filter((chatRoom) =>
-          chatRoom[1].includes(myInfo.key)
+        myChatRoomList = Object.entries(data).filter(
+          (chatRoom: [string, string[]]) => chatRoom[1].includes(myInfo?.key)
         );
       }
     });
 
-    if (groupChatUsers.length > 0) {
+    if (groupChatUsers?.length > 0) {
       const groupChatRoom = myChatRoomList.filter(
         (chatRoom) => chatRoom[1].length > 2
       );
 
       const currentChatRoom = groupChatRoom.find((chatRoom) => {
-        const users = chatRoom[1].filter((userId) => userId !== myInfo.key);
-        console.log();
+        const users = chatRoom[1].filter(
+          (userId: string) => userId !== myInfo.key
+        );
+
         if (
           users.sort().join('') ===
           groupChatUsers
@@ -99,7 +107,7 @@ function Home() {
     setChatRoomKey(currentChatRoom?.[0]);
   };
 
-  const createRoomKey = (key) => {
+  const createRoomKey = (key: string) => {
     setChatRoomKey(key);
   };
 
@@ -117,7 +125,7 @@ function Home() {
       <Head>
         <title>홈</title>
       </Head>
-      {Object.keys(myInfo).length > 0 && (
+      {myInfo && Object.keys(myInfo).length > 0 && (
         <div className="flex">
           <div className="flex flex-col flex-none w-56 h-screen bg-gray-700 shadow">
             <div className="bg-gray-900 text-gray-100 divide-x divide-gray-500 border-gray-500 border-b">

@@ -12,18 +12,18 @@ function ChatList({ handleListClick, myId }) {
       const data = snapshot.val();
 
       if (data) {
-        myChatRoomList = Object.entries(data).filter((chatRoom) =>
-          chatRoom[1].includes(myId)
+        myChatRoomList = Object.entries(data).filter(
+          (chatRoom: [string, string[]]) => chatRoom[1].includes(myId)
         );
       }
     });
 
     myChatRoomList.forEach((chatRoom) => {
-      const chatUserId = chatRoom[1].filter((key) => key !== myId);
+      const chatUserId = chatRoom[1].filter((key: string) => key !== myId);
       const groupChatUsers = [];
 
       if (chatUserId.length > 1) {
-        chatUserId.forEach((userId) => {
+        chatUserId.forEach((userId: string) => {
           onValue(ref(db, 'users/' + userId), (snapshot) => {
             const user = snapshot.val();
 
@@ -34,7 +34,7 @@ function ChatList({ handleListClick, myId }) {
         return;
       }
 
-      chatUserId.forEach((userId) => {
+      chatUserId.forEach((userId: string) => {
         onValue(ref(db, 'users/' + userId), (snapshot) => {
           const user = snapshot.val();
           setChatUserList((pre) => [
