@@ -39,7 +39,7 @@ function ChatRoom({
   const createChatRoom = () => {
     let key = '';
 
-    if (groupChatUsers.length > 0) {
+    if (groupChatUsers?.length > 0) {
       key = push(ref(db, 'groupChatRooms/')).key;
 
       set(ref(db, 'usersChatRoomList/' + key), [

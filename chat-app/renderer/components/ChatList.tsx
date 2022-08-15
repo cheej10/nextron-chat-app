@@ -54,23 +54,29 @@ function ChatList({ handleListClick, myId }) {
   }, []);
 
   return (
-    <ul className="divide-y divide-gray-500">
-      {chatUserList.map((user) => (
-        <li
-          key={
-            Array.isArray(user) ? user.map(({ key }) => key).join('') : user.key
-          }
-          className="p-3 text-gray-100 hover:cursor-pointer hover:bg-gray-500"
-          onClick={() => {
-            handleListClick(user);
-          }}
-        >
-          {Array.isArray(user)
-            ? user.map(({ nickname }) => nickname).join(', ')
-            : user.nickname}
-        </li>
-      ))}
-    </ul>
+    <>
+      {chatUserList.length > 0 && (
+        <ul className="divide-y divide-gray-500">
+          {chatUserList.map((user) => (
+            <li
+              key={
+                Array.isArray(user)
+                  ? user.map(({ key }) => key).join('')
+                  : user.key
+              }
+              className="p-3 text-gray-100 hover:cursor-pointer hover:bg-gray-500"
+              onClick={() => {
+                handleListClick(user);
+              }}
+            >
+              {Array.isArray(user)
+                ? user.map(({ nickname }) => nickname).join(', ')
+                : user.nickname}
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
   );
 }
 

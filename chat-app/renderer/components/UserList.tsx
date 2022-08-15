@@ -85,53 +85,57 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
   }, []);
 
   return (
-    <div className="grow flex flex-col">
-      <ul className="grow divide-y divide-gray-500">
-        {userList.map((user) => (
-          <li
-            key={user.key}
-            className="p-3 flex items-center justify-between text-gray-100 hover:cursor-pointer hover:bg-gray-500"
-            onClick={() => {
-              userSelectMode || handleListClick(user);
-            }}
-          >
-            {user.nickname}
-            {userSelectMode && (
-              <input
-                type="checkbox"
-                className="w-5 h-5"
-                value={user.key}
-                onChange={handleCheckboxClick}
-              ></input>
+    <>
+      {userList.length > 0 && (
+        <div className="grow flex flex-col">
+          <ul className="grow divide-y divide-gray-500">
+            {userList.map((user) => (
+              <li
+                key={user.key}
+                className="p-3 flex items-center justify-between text-gray-100 hover:cursor-pointer hover:bg-gray-500"
+                onClick={() => {
+                  userSelectMode || handleListClick(user);
+                }}
+              >
+                {user.nickname}
+                {userSelectMode && (
+                  <input
+                    type="checkbox"
+                    className="w-5 h-5"
+                    value={user.key}
+                    onChange={handleCheckboxClick}
+                  ></input>
+                )}
+              </li>
+            ))}
+            {userSelectMode ? (
+              <button
+                type="button"
+                className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
+                onClick={handleCompleteBtn}
+              >
+                완료
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
+                onClick={() => setUserSelectMode(true)}
+              >
+                그룹채팅
+              </button>
             )}
-          </li>
-        ))}
-        {userSelectMode ? (
+          </ul>
           <button
             type="button"
             className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
-            onClick={handleCompleteBtn}
+            onClick={logout}
           >
-            완료
+            로그아웃
           </button>
-        ) : (
-          <button
-            type="button"
-            className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
-            onClick={() => setUserSelectMode(true)}
-          >
-            그룹채팅
-          </button>
-        )}
-      </ul>
-      <button
-        type="button"
-        className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
-        onClick={logout}
-      >
-        로그아웃
-      </button>
-    </div>
+        </div>
+      )}
+    </>
   );
 }
 
