@@ -123,6 +123,9 @@ function Signup() {
                 type="password"
                 onChange={(e) => setSignupPassword(e.target.value)}
               />
+              <p className="text-xs mt-1 text-gray-500">
+                *6자리 이상 입력해주세요.
+              </p>
             </div>
             {isError && <p className="text-red-500 text-xs">{errorMessage}</p>}
             <div className="flex flex-col items-center justify-center mt-6">
