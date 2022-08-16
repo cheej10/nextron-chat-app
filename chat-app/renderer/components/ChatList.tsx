@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getDatabase, ref, onValue } from 'firebase/database';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUsers, faUser } from '@fortawesome/free-solid-svg-icons';
 
 type propsType = {
   handleListClick: Function;
@@ -77,9 +79,17 @@ function ChatList({ handleListClick, myId }: propsType) {
                 handleListClick(user);
               }}
             >
-              {Array.isArray(user)
-                ? user.map(({ nickname }) => nickname).join(', ')
-                : user.nickname}
+              {Array.isArray(user) ? (
+                <div>
+                  <FontAwesomeIcon icon={faUsers} className="mr-2 text-md" />
+                  {user.map(({ nickname }) => nickname).join(', ')}
+                </div>
+              ) : (
+                <div>
+                  <FontAwesomeIcon icon={faUser} className="mr-3 text-xl" />
+                  {user.nickname}
+                </div>
+              )}
             </li>
           ))}
         </ul>

@@ -12,11 +12,19 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [isError, setIsError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const login = async () => {
     try {
       setIsLoading(true);
 
+      if (!loginEmail.trim() || !loginPassword.trim()) {
+        setIsError(true);
+        setErrorMessage('정보를 모두 입력해주세요.');
+        setIsLoading(false);
+        return;
+      }
       const user = await signInWithEmailAndPassword(
         auth,
         loginEmail,
@@ -27,16 +35,12 @@ function Login() {
       router.push('/home');
     } catch (error) {
       setIsLoading(false);
+      setIsError(true);
 
-      switch (error.code) {
-        case 'auth/user-not-found':
-          console.log('가입되지 않은 이메일입니다.');
-          break;
-        case 'auth/internal-error':
-          console.log('정보를 모두 입력해주세요.');
-          break;
-        default:
-          console.log('이메일이나 비밀번호가 잘못되었습니다.');
+      if (error.code === 'auth/user-not-found') {
+        setErrorMessage('가입되지 않은 이메일입니다.');
+      } else {
+        setErrorMessage('이메일이나 비밀번호가 잘못되었습니다.');
       }
     }
   };
@@ -65,7 +69,7 @@ function Login() {
                 onChange={(e) => setLoginEmail(e.target.value)}
               />
             </div>
-            <div className="mb-6">
+            <div className="mb-2">
               <label
                 className="block text-gray-700 text-sm font-bold mb-2"
                 htmlFor="password"
@@ -73,13 +77,14 @@ function Login() {
                 비밀번호
               </label>
               <input
-                className="shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 id="password"
                 type="password"
                 onChange={(e) => setLoginPassword(e.target.value)}
               />
             </div>
-            <div className="flex flex-col items-center justify-center">
+            {isError && <p className="text-red-500 text-xs">{errorMessage}</p>}
+            <div className="flex flex-col items-center justify-center mt-6">
               <button
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 type="button"
