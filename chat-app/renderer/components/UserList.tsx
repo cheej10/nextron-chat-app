@@ -102,7 +102,7 @@ function UserList({ handleListClick, handleGroupChat, myInfo }: propsType) {
   return (
     <>
       {userList.length > 0 && (
-        <div className="grow flex flex-col">
+        <>
           <p className="px-3 py-2 text-sm">나</p>
           <div className="p-3 flex items-center divide-x-2">
             <FontAwesomeIcon icon={faCircleUser} className="mr-2 text-3xl" />
@@ -136,38 +136,40 @@ function UserList({ handleListClick, handleGroupChat, myInfo }: propsType) {
               </li>
             ))}
           </ul>
-          {userSelectMode ? (
-            <button
-              type="button"
-              disabled={checkedUsers.length < 2 ? true : false}
-              className="py-4 w-full border-t border-gray-500 hover:bg-gray-500 text-sm"
-              onClick={handleCompleteBtn}
-            >
-              {checkedUsers.length < 2 ? '2명 이상 선택해주세요.' : '완료'}
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="py-4 w-full border-t border-gray-500 hover:bg-gray-500 text-sm"
-              onClick={() => setUserSelectMode(true)}
-            >
-              <FontAwesomeIcon icon={faUsers} className="text-lg mr-2" />
-              그룹채팅
-            </button>
-          )}
+        </>
+      )}
+      <div className="mt-auto">
+        {userSelectMode ? (
+          <button
+            type="button"
+            disabled={checkedUsers.length < 2 ? true : false}
+            className="py-4 w-full border-t border-gray-500 hover:bg-gray-500 text-sm"
+            onClick={handleCompleteBtn}
+          >
+            {checkedUsers.length < 2 ? '2명 이상 선택해주세요.' : '완료'}
+          </button>
+        ) : (
           <button
             type="button"
             className="py-4 w-full border-t border-gray-500 hover:bg-gray-500 text-sm"
-            onClick={logout}
+            onClick={() => setUserSelectMode(true)}
           >
-            <FontAwesomeIcon
-              icon={faArrowRightFromBracket}
-              className="text-xl mr-2"
-            />
-            로그아웃
+            <FontAwesomeIcon icon={faUsers} className="text-lg mr-2" />
+            그룹채팅
           </button>
-        </div>
-      )}
+        )}
+        <button
+          type="button"
+          className="py-4 w-full border-t border-gray-500 hover:bg-gray-500 text-sm"
+          onClick={logout}
+        >
+          <FontAwesomeIcon
+            icon={faArrowRightFromBracket}
+            className="text-xl mr-2"
+          />
+          로그아웃
+        </button>
+      </div>
     </>
   );
 }
