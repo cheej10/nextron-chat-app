@@ -161,7 +161,7 @@ function Home() {
               <UserList
                 handleListClick={handleListClick}
                 handleGroupChat={handleGroupChat}
-                myId={myInfo.key}
+                myInfo={myInfo}
               ></UserList>
             )}
             {openChatList && (

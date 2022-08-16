@@ -10,7 +10,17 @@ import {
   faCircleUser,
 } from '@fortawesome/free-solid-svg-icons';
 
-function UserList({ handleListClick, handleGroupChat, myId }) {
+type propsType = {
+  handleListClick: Function;
+  handleGroupChat: Function;
+  myInfo: {
+    key: string;
+    email: string;
+    nickname: string;
+  };
+};
+
+function UserList({ handleListClick, handleGroupChat, myInfo }: propsType) {
   const [userList, setUserList] = useState([]);
   const [userSelectMode, setUserSelectMode] = useState(false);
   const [checkedUsers, setCheckedUsers] = useState([]);
@@ -26,7 +36,7 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
       if (data) {
         setUserList(
           Object.keys(data)
-            .filter((key) => key !== myId)
+            .filter((key) => key !== myInfo.key)
             .map((key) => {
               return {
                 key,
@@ -50,11 +60,6 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
   };
 
   const handleCompleteBtn = () => {
-    if (checkedUsers.length < 2) {
-      console.log('두 명 이상 선택해주세요.');
-      return;
-    }
-
     const usersRef = ref(db, 'users/');
     let users = [];
 
@@ -98,6 +103,12 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
     <>
       {userList.length > 0 && (
         <div className="grow flex flex-col">
+          <p className="px-3 py-2 text-sm">나</p>
+          <div className="p-3 flex items-center divide-x-2">
+            <FontAwesomeIcon icon={faCircleUser} className="mr-2 text-3xl" />
+            {myInfo.nickname}
+          </div>
+          <p className="px-3 py-2 text-sm">친구</p>
           <ul className="grow divide-y divide-gray-500">
             {userList.map((user) => (
               <li
@@ -124,29 +135,29 @@ function UserList({ handleListClick, handleGroupChat, myId }) {
                 )}
               </li>
             ))}
-            {userSelectMode ? (
-              <button
-                type="button"
-                disabled={checkedUsers.length < 2 ? true : false}
-                className="py-4 w-full border-t border-gray-500 hover:bg-gray-500 text-sm"
-                onClick={handleCompleteBtn}
-              >
-                {checkedUsers.length < 2 ? '2명 이상 선택해주세요.' : '완료'}
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="py-4 w-full border-t border-gray-500 hover:bg-gray-500 text-sm"
-                onClick={() => setUserSelectMode(true)}
-              >
-                <FontAwesomeIcon icon={faUsers} className="text-lg mr-2" />
-                그룹채팅 시작하기
-              </button>
-            )}
           </ul>
+          {userSelectMode ? (
+            <button
+              type="button"
+              disabled={checkedUsers.length < 2 ? true : false}
+              className="py-4 w-full border-t border-gray-500 hover:bg-gray-500 text-sm"
+              onClick={handleCompleteBtn}
+            >
+              {checkedUsers.length < 2 ? '2명 이상 선택해주세요.' : '완료'}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="py-4 w-full border-t border-gray-500 hover:bg-gray-500 text-sm"
+              onClick={() => setUserSelectMode(true)}
+            >
+              <FontAwesomeIcon icon={faUsers} className="text-lg mr-2" />
+              그룹채팅
+            </button>
+          )}
           <button
             type="button"
-            className="py-4 w-full border-t border-gray-500 hover:bg-gray-500"
+            className="py-4 w-full border-t border-gray-500 hover:bg-gray-500 text-sm"
             onClick={logout}
           >
             <FontAwesomeIcon

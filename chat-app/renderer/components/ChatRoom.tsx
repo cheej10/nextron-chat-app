@@ -78,6 +78,8 @@ function ChatRoom({
     e: React.KeyboardEvent<HTMLElement> | React.MouseEvent<HTMLElement>
   ) => {
     if (e.type === 'click' || ('key' in e && e.key === 'Enter')) {
+      if (e.shiftKey) return;
+
       e.preventDefault();
 
       setInputMessage('');
